@@ -72,11 +72,11 @@ Units are pixels (`px`), percentage (`%`, also named `perct`), and font-size mul
 
 Rules are considered in source order. For a given element and canonical modifier, the first valid declaration from the earliest matching rule that declares that modifier wins. Later rules and later declarations of that modifier do not replace it. Aliases and canonical names refer to the same modifier for this rule. This first-match behavior is intentional and differs from the CSS cascade. The tag list does not affect precedence.
 
-A declaration is valid only if it has exactly the required number and types of parameters, except where a parameter count range is stated. Invalid declarations are ignored. Unmentioned properties receive the defaults in Section 6.
+A declaration is valid when it has at least the required parameters, those parameters have the required types, and any stated minimum parameter count is met. Parameters beyond those used by a modifier are ignored. Invalid declarations are ignored. Unmentioned properties receive the defaults in Section 6.
 
 ### 5.2 Modifier table
 
-`Length` means a `px`, `%`, or `et` value; `Number` means a number; `String` means a string. Extra parameters invalidate the declaration unless the table explicitly gives a range.
+`Length` means a `px`, `%`, or `et` value; `Number` means a number; `String` means a string. Extra parameters are ignored; a modifier still requires the stated minimum number of parameters and valid types for the parameters it uses.
 
 | Canonical modifier | Alias | Parameters | Meaning |
 | --- | --- | --- | --- |
@@ -96,7 +96,7 @@ A declaration is valid only if it has exactly the required number and types of p
 | `height` | `h` | 1 Length | Content height |
 | `general` | `g` | 1–4 Lengths | Sets x, y, width, height in that order |
 | `display` | `d` | 1 String | `text`, `flex`, or `flex-grow` |
-| `overflow` | `o` | 1–3 Strings | See Section 9 |
+| `overflow` | `o` | 1–3 Strings | See Section 9; later parameters are ignored |
 | `flex-weight` | `fw` | 1 Number or the string `Infinity` | Flex allocation weight |
 | `flex-grow-cap` | `fgc` | 1 Number or `Infinity` string | Maximum growth weight |
 | `flex-direction` | `fd` | 1 String | `x` or `y` |
@@ -129,7 +129,7 @@ For `text` display, children are placed at their computed x/y (default 0,0), in 
 
 ## 8. Flex layout
 
-A `flex` or `flex-grow` element lays out its element children in document order along its flex axis. The available main-axis size is the parent's content-box dimension on that axis. Each child's occupied main-axis size consists of content size plus padding and margins. Subtract the occupied sizes of children with an explicit main-axis dimension, then subtract the margins and padding of all children without an explicit main-axis dimension. The remainder is the distributable content size. Divide it among those flexible children in proportion to flex weights; each share is the child's content size. Children with an explicit main-axis dimension consume their fixed occupied size and are excluded from distribution. If remaining space is negative, flexible children receive zero content size and overflow may result. If the sum of applicable weights is zero, flexible children receive zero main-axis size.
+A `flex` or `flex-grow` element lays out its element children in document order along its flex axis. The available main-axis size is the parent's content-box dimension on that axis. First calculate each child's weighted main-axis size as the parent's available main-axis size multiplied by the child's applicable flex weight divided by the flex total (the sum of all children's applicable weights). Subtract that child's main-axis margins and padding to obtain its content size. A child with an explicit main-axis dimension keeps that explicit content size instead of its weighted size; it still contributes its weight to the flex total. Fixed-size children can therefore leave unused space or cause overflow. If the flex total is zero, each weighted size is zero. Negative computed content sizes are clamped to zero.
 
 On the cross axis, a child with an undefined dimension fills the parent's content-box dimension minus the child's padding and margins. An explicit cross-axis dimension is retained. Flex layout ignores child `x` and `y` offsets: children start at the parent's content-box leading edge plus their leading margin on the cross axis, and are placed consecutively on the main axis with no gaps, in document order. No alignment, wrapping, or gap behavior is defined in version 0.1.0.
 
@@ -137,7 +137,7 @@ Weights are finite numbers or the special string `Infinity`; negative numeric we
 
 ## 9. Overflow and growth
 
-Overflow is evaluated after initial sizing. The **scrollport** is the element's content box. A viewport in this section means the containing block's content box; for the root, it is the root viewport. The **scrollable overflow area** is the union of the element's content and descendant border boxes, expanded by each box's margins, before clipping. A margin extending beyond the scrollport therefore creates overflow. Overflow axis parameter 1 is `w`/`width`, `h`/`height`, or `both`. Parameter 2 may be `grow` or `hidden`. Parameter 3 may be `hidden`. If either optional parameter is `hidden`, overflow is clipped at the scrollport and no scrollbar is exposed. Otherwise the selected axes are scrollable and expose scrollbars when their scrollable overflow area exceeds the scrollport. A scrollbar's thickness and exact rendering are host-defined and do not alter LCSS sizing.
+Overflow is evaluated after initial sizing. The **scrollport** is the element's content box. A viewport in this section means the containing block's content box; for the root, it is the root viewport. The **scrollable overflow area** is the union of the element's content and descendant border boxes, expanded by each box's margins, before clipping. A margin extending beyond the scrollport therefore creates overflow. Overflow axis parameter 1 is `w`/`width`, `h`/`height`, or `both` (ASCII case-insensitive). Parameter 2 may be `grow` or `hidden`. Parameter 3 may be `hidden`. If either optional parameter is `hidden`, overflow is clipped at the scrollport and no scrollbar is exposed. Otherwise the selected axes are scrollable and expose scrollbars when their scrollable overflow area exceeds the scrollport. A scrollbar's thickness and exact rendering are host-defined and do not alter LCSS sizing.
 
 For text display without `grow`, let `W0,H0` be the pre-overflow content dimensions and `Wv,Hv` the containing viewport dimensions. A dimension explicitly set by `width`/`height` is fixed; only undefined dimensions may be changed. For axis `w`, set an undefined height to `min(H0,Hv)`; if width is undefined and the resulting height is positive, set width to `max(W0, W0*H0/H)`. For axis `h`, set an undefined width to `min(W0,Wv)`; if height is undefined and resulting width is positive, set height to `max(H0, W0*H0/W)`. For axis `both`, first set each undefined dimension to its minimum of original and viewport size. Let `A=W0*H0`. If the resulting area is below A and both dimensions are undefined, select the dimension with the smaller fit ratio (`W/W0` versus `H/H0`; ties select width), and set it to `A` divided by the other dimension. Do not restore or clamp the selected dimension to its original size; it may exceed both its original size and viewport. If one dimension is fixed, keep it fixed and set the other undefined dimension to `A/fixed_dimension` when the fixed dimension is positive. If either required divisor is zero, retain the dimensions established by the initial fit step. Fixed dimensions are never changed. Any excess beyond the viewport remains scrollable on the selected axes. These rules preserve the original area where dimensions permit; they do not guarantee the fitted box stays within the viewport.
 
