@@ -1,5 +1,6 @@
 <!-- TODO:
-elements (makes multiplel layers)
+elements (makes multiple layers)
+text
 --->
 
 # Syntax
