@@ -1,7 +1,5 @@
 <!-- TODO:
-include (copies style modifiers)
 elements (makes multiplel layers)
-math (PEMDAS + more)
 --->
 
 # Syntax
@@ -31,10 +29,34 @@ modifiers:
 ... {
 	modifier-name: value, value2, value3, etc.;
 	modifier2: value, value2, value3, etc.;
-	...
+	example-math: a + b, a - b, a / b, a * b, a + (a * b), a ^ b;
 }
 ```
 If a modifier is defined twice or more times, then the modifier which is matched earliest will always be the value to use (so like in <div class="a b">, 'a' will always win).
+Math is defined following C syntax for math, the symbols are:
+* 1: '=>': larger than or equal, A > B = 0, A => B = 1
+* 1: '<=': larger than or equal, A < B = 0, A <= B = 1
+* 1: '==': equals, A == B = 1, A != B = 0
+* 1: '<' : less than, A < B = 1, A > B = 0
+* 1: '>' : larger than, A > B = 1, A < B = 0
+* 1: '!' : not, N > 0 -> 0, N =< 0 -> 1, 
+* 2: '+' : addition
+* 2: '-' : subtraction
+* 3: '*' : multiplication
+* 3: '/' : division
+* 3: '%' : modulus, same level as * and /
+* 4: '^' : power
+* 5: '(' and ')' : parantheses
+Order of Precedence is according to PEMDAS. this equation is to be calculated to get the actual value.
+Math cannot be done on string's.
+if an operation is done on 2 of the same unit, their number can be directly used without any conversion (e.g 100% - 80% = 20%).
+else, conversion is needed, this is based on the 2 units that math is being done on:
+* px to num / num to px : px is converted to num by using the value directly
+* px to et / et to px / perct to px / px to perct: perct/et is converted to px according to standard conversion (-> # Units)
+* perct to et / et to perct : converted down to px to px
+* num to et / et to num / num to perct / perct to num : et/perct is converted to px, then that is converted to num ^^^
+* px to bool / bool to px / et to bool / bool to et / perct to bool / bool to perct / num to bool / bool to num : px -> num, et / perct -> num, bool -> ? True -> 1, False -> 0
+output is based on the last equation done, if its px to px, it will be px output, else if its px to number, number to px or number to number, it will be number
 
 # Units
 NNN stands for a value of variable length, anything else is a way to define which unit is being used.
@@ -81,6 +103,7 @@ NOTE: margin & padding operate similair to CSS, if a width and/or height is defi
 | Flex | 'flex-weight' | 'fw' | 1 - num, rest - ignored | -> ## Flex / ## Flex-grow |
 | Flex | 'flex-grow-cap' | 'fgc' | 1 - num, rest - ignored | -> ## Flex / ## Flex-grow & # Grow |
 | Flex | 'flex-direction' | 'fd' | 1 - str ('x' or 'y'), rest - ignored | -> ## Flex / ## Flex-grow |
+| Reference | 'include' | 'i' | 1 - str, 2 - str, etc. | 1 till N is a style tag name and the corresponding modifiers should just be copied into this block, updates on the correspoding block also cause updated in the block using include, not an actual tag = ignored, appears more than once = all occurences included, nested include = nested include is executed, cycle include = ignore the deepest include that caused the problem (only for the specific param that caused it though) |
 
 # Display
 Throughout all of this, margin & padding have to be included in any eqautions.
