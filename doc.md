@@ -33,30 +33,31 @@ modifiers:
 }
 ```
 If a modifier is defined twice or more times, then the modifier which is matched earliest will always be the value to use (so like in <div class="a b">, 'a' will always win).
-Math is defined following C syntax for math, the symbols are:
+Math is defined follows traditional parantheses nesting and uses 'a operator b' syntax (exception for '!', it can do '!NNN'), the symbols are:
 * 1: '=>': larger than or equal, A > B = 0, A => B = 1
-* 1: '<=': larger than or equal, A < B = 0, A <= B = 1
+* 1: '<=': less than or equal, A < B = 0, A <= B = 1
 * 1: '==': equals, A == B = 1, A != B = 0
 * 1: '<' : less than, A < B = 1, A > B = 0
 * 1: '>' : larger than, A > B = 1, A < B = 0
-* 1: '!' : not, N > 0 -> 0, N =< 0 -> 1, 
 * 2: '+' : addition
 * 2: '-' : subtraction
 * 3: '*' : multiplication
 * 3: '/' : division
-* 3: '%' : modulus, same level as * and /
+* 3: '%' : modulus, same level as * and /, should be differed from Unit perct by it having a space between N and % (e.g. 'NNN %')
 * 4: '^' : power
+* 4: '!' : not, N > 0 -> 0, N =< 0 -> 1, 
 * 5: '(' and ')' : parantheses
-Order of Precedence is according to PEMDAS. this equation is to be calculated to get the actual value.
-Math cannot be done on string's.
-if an operation is done on 2 of the same unit, their number can be directly used without any conversion (e.g 100% - 80% = 20%).
-else, conversion is needed, this is based on the 2 units that math is being done on:
-* px to num / num to px : px is converted to num by using the value directly
-* px to et / et to px / perct to px / px to perct: perct/et is converted to px according to standard conversion (-> # Units)
-* perct to et / et to perct : converted down to px to px
-* num to et / et to num / num to perct / perct to num : et/perct is converted to px, then that is converted to num ^^^
-* px to bool / bool to px / et to bool / bool to et / perct to bool / bool to perct / num to bool / bool to num : px -> num, et / perct -> num, bool -> ? True -> 1, False -> 0
-output is based on the last equation done, if its px to px, it will be px output, else if its px to number, number to px or number to number, it will be number
+Order of Precedence is according to levels, where the higher levels go first and then the lower levels (1 is lowest, 5 is highest)
+an operation is always done on the values, however, if there are 2 different units, the resulting unit must be chosen based on these rules:
+* px to num 	: px, num -> px 	(copied)
+* px to et		: px, et -> px		(converted, -> # Units)
+* px to perct	: px, perct -> px	(converted, -> # Units)
+* et to perct	: px, both -> px	(converted, -> # Units)
+* et to num		: et, num -> et		(copied)
+* perct to num	: perct, num -> perct (copied)
+NOTE: bools evaluate to num's based on this: True -> 1, False -> 0
+NOTE: str's evaluate to num's with the value 0.
+NOTE: ^^^ occurs first
 
 # Units
 NNN stands for a value of variable length, anything else is a way to define which unit is being used.
